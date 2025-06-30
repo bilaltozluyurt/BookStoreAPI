@@ -5,10 +5,16 @@ using BookStoreApi.BookOperation.GetBookDetail;
 using BookStoreApi.BookOperation.GetBooks;
 using BookStoreApi.BookOperation.UpdateBook;
 using BookStoreApi.DbOperations;
+using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 using static BookStoreApi.BookOperation.CreateBook.CreateBookCommand;
 using static BookStoreApi.BookOperation.GetBookDetail.GetBookDetailQuery;
 using static BookStoreApi.BookOperation.UpdateBook.UpdateBookCommand;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using ValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
+
 
 namespace BookStoreApi.Controllers
 {
@@ -39,11 +45,14 @@ namespace BookStoreApi.Controllers
             
             try
             {
-                GetBookDetailQuery query = new(_context,_mapper)
+                GetBookDetailQuery query = new(_context, _mapper)
                 {
+                    
                     BookId = id
                 };
-                result= query.Handle();
+                GetBookDetailValidator validator = new();
+                validator.ValidateAndThrow(query);
+                result = query.Handle();
             }
             catch (Exception ex)
             {
@@ -71,7 +80,16 @@ namespace BookStoreApi.Controllers
             try
             {
                 command.Model = NewBook;
+                CreateBookCommandValidator validator = new();
+                validator.ValidateAndThrow(command);
                 command.Handle();
+                //FluentValidation.Results.ValidationResult result = validator.Validate(command);
+                //if(!result.IsValid)
+                //    foreach (var item in result.Errors)
+                //    {
+                //        Console.WriteLine("Özellik : "+ item.PropertyName+ "-Error Message:"+ item.ErrorMessage);   
+                //    }
+
 
             }
             catch (Exception ex)
@@ -92,6 +110,8 @@ namespace BookStoreApi.Controllers
             {
                 UpdateBookCommand command = new(_context);
                 command.BookId = id;
+                UpdateBookCommandValidation validation = new();
+                validation.ValidateAndThrow(command);
                 command.Model = updatedBook;
                 command.Handle();
             }
@@ -123,6 +143,9 @@ namespace BookStoreApi.Controllers
             {
                 DeleteBookCommand command = new DeleteBookCommand(_context);
                 command.BookId = id;
+                DeleteBookCommandValidator validator = new();
+                validator.ValidateAndThrow(command);
+
                 command.Handle();
             }
             catch (Exception ex)
