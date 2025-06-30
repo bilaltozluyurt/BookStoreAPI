@@ -12,7 +12,7 @@ Currently uses in-memory data storage for learning and prototyping purposes.
 
 ## ⚙️ Technologies Used
 - ASP.NET Core Web API
-- .NET 8
+- .NET 9
 - InMemory data store
 
 ## 📦 Getting Started
